@@ -7,6 +7,7 @@ const Editable = () => {
 	const { useState, useEffect } = React;
 	const tableRef = React.createRef();
 	const PORT = 3000;
+	const serverIP = 'localhost'
 
 	const [columns, setColumns] = useState([
 		{ title: 'Scheduled Date/Time', field: 'datetime', type: 'datetime' },
@@ -27,10 +28,15 @@ const Editable = () => {
 	const [data, setData] = useState([]);
 	const fetchRemoteData = () =>
 	{
-		fetch(`http://localhost:${PORT}/records`)
+		fetch(`http://${serverIP}:${PORT}/records`)
 			.then(response => response.json())
 			.then(records => setData(records.data))
 			.catch(err => window.alert('Records Not Properly Fetched'))
+	}
+
+	const validateData = (data) => {
+		console.log(data)
+		return Object.keys(data).length === 5;
 	}
 
 	useEffect(fetchRemoteData, [])
@@ -45,18 +51,27 @@ const Editable = () => {
 				onRowAdd: newData =>
 					new Promise((resolve, reject) => {
 						setTimeout(() => {
-							// Send the whole json to server, allow server to store in DB as well as schedule tasks based off it
-							const {datetime, sid, str, onoff, reoccur} = newData;
-							fetch('http://localhost:3000/entry', {
-								method: 'POST',
-								headers: {'Content-Type': 'application/json'},
-								body: JSON.stringify({datetime, sid, str, onoff, reoccur, uuid: uuidv4()})
-							})
-								.then(resp => resp.json())
-								.then(record => setData([...data, record]))
-								.catch(err => window.alert('Unable to Schedule Task'))
+							if(validateData(newData))
+							{
+								// Send the whole json to server, allow server to store in DB as well as schedule tasks based off it
+								const {datetime, sid, str, onoff, reoccur} = newData;
+								fetch('http://localhost:3000/entry', {
+									method: 'POST',
+									headers: {'Content-Type': 'application/json'},
+									body: JSON.stringify({datetime, sid, str, onoff, reoccur, uuid: uuidv4()})
+								})
+									.then(resp => resp.json())
+									.then(record => setData([...data, record]))
+									.catch(err => window.alert('Unable to Schedule Task'))
 
-							resolve();
+								resolve();
+							}
+							else
+							{
+								window.alert('Please Fill All Columns');
+								reject();
+							}
+
 						}, 1000)
 					}),
 				onRowUpdate: (newData, oldData) =>
