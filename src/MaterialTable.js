@@ -1,33 +1,16 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import MaterialTable from "material-table";
 import { v4 as uuidv4 } from 'uuid';
 
 
-const Editable = () => {
-	const { useState, useEffect } = React;
-	const tableRef = React.createRef();
+const Table = () => {
 	const PORT = 3000;
 	const serverIP = 'localhost'
-
-	const [columns, setColumns] = useState([
-		{ title: 'Scheduled Date/Time', field: 'datetime', type: 'datetime' },
-		{ title: 'Sprinkler ID', field: 'sid', type: 'numeric'},
-		{ title: 'Seconds To Run', field: 'str', type: 'numeric' },
-		{
-			title: 'On/Off',
-			field: 'onoff',
-			lookup: { 1: 'On', 0: 'Off' },
-		},
-		{
-			title: 'Weekly Reoccurrence',
-			field: 'reoccur',
-			lookup: { true: 'Yes', false: 'No' },
-		},
-	]);
 
 	const [data, setData] = useState([]);
 	const fetchRemoteData = () =>
 	{
+		console.log('Fetch Called')
 		fetch(`http://${serverIP}:${PORT}/records`)
 			.then(response => response.json())
 			.then(records => setData(records.data))
@@ -35,17 +18,29 @@ const Editable = () => {
 	}
 
 	const validateData = (data) => {
-		console.log(data)
 		return Object.keys(data).length === 5;
 	}
 
-	useEffect(fetchRemoteData, [])
+	//useEffect(fetchRemoteData, [])
 
 	return (
 		<MaterialTable
 			title="Sprinkler Schedule"
-			columns={columns}
-			tableRef={tableRef}
+			columns={[
+				{ title: 'Scheduled Date/Time', field: 'datetime', type: 'datetime' },
+				{ title: 'Sprinkler ID', field: 'sid', type: 'numeric'},
+				{ title: 'Seconds To Run', field: 'str', type: 'numeric' },
+				{
+					title: 'On/Off',
+					field: 'onoff',
+					lookup: { 1: 'On', 0: 'Off' },
+				},
+				{
+					title: 'Weekly Reoccurrence',
+					field: 'reoccur',
+					lookup: { true: 'Yes', false: 'No' },
+				},
+			]}
 			data = {data}
 			editable={{
 				onRowAdd: newData =>
@@ -131,4 +126,4 @@ const Editable = () => {
 	)
 }
 
-export default Editable;
+export default Table;
