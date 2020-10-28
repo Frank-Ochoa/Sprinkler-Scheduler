@@ -21,7 +21,7 @@ const Table = () => {
 		return Object.keys(data).length === 5;
 	}
 
-	//useEffect(fetchRemoteData, [])
+	useEffect(fetchRemoteData, [])
 
 	return (
 		<MaterialTable
